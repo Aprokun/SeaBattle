@@ -7,8 +7,21 @@ const BoardComponent = ({ board, setBoard, shipsReady, isMyBoard, canShoot, shoo
 
     console.log(board)
 
+    function update() {
+
+        const newBoard = board.getCopyBoard()
+        setBoard(newBoard)
+    }
+
     function addMark(x, y) {
 
+        if (!shipsReady && isMyBoard) {
+            board.addShip(x, y)
+        } else if (canShoot && !isMyBoard) {
+            shoot(x, y)
+        }
+
+        update()
     }
 
     if (canShoot) {
