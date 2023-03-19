@@ -1,7 +1,7 @@
 import React from "react";
 import CellComponent from "./CellComponent";
 
-const BoardComponent = ({ board, setBoard, shipsReady, isMyBoard, canShoot, shoot }) => {
+const BoardComponent = ({board, setBoard, shipsReady, isMyBoard, canShoot, shoot}) => {
 
     const boardClasses = ['board']
 

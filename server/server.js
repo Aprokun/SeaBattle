@@ -24,7 +24,7 @@ function initGames(client, gameId) {
 
 function broadcast(req) {
 
-    const { username, gameId } = req.payload
+    const {username, gameId} = req.payload
 
     let res;
 
@@ -44,19 +44,19 @@ function broadcast(req) {
                 break
 
             case 'ready':
-                res = { type: 'readyToPlay', payload: { canStart: games[gameId].length > 1, username } }
+                res = {type: 'readyToPlay', payload: {canStart: games[gameId].length > 1, username}}
                 break
 
             case 'shoot':
-                res = { type: 'afterShootByMe', payload: req.payload }
+                res = {type: 'afterShootByMe', payload: req.payload}
                 break
 
             case 'checkShoot':
-                res = {type: 'isPerfectHit', payload: req.payload }
+                res = {type: 'isPerfectHit', payload: req.payload}
                 break
 
             default:
-                req = { type: 'logout', payload: req.payload }
+                req = {type: 'logout', payload: req.payload}
                 break
         }
 
@@ -68,7 +68,7 @@ function broadcast(req) {
 function start() {
 
     const wss = new WebSocket.Server(
-        { port: port },
+        {port: port},
         () => console.log('Server start on port ' + port)
     )
 

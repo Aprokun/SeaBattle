@@ -14,7 +14,7 @@ const GamePage = () => {
     const [shipsReady, setShipsReady] = useState(false)
     const [canShoot, setCanShoot] = useState(false)
 
-    const { gameId } = useParams()
+    const {gameId} = useParams()
 
     function restart() {
 
@@ -31,23 +31,23 @@ const GamePage = () => {
     const navigate = useNavigate()
 
     function shoot(x, y) {
-        wss.send(JSON.stringify({ event: 'shoot', payload: { username: localStorage.nickname, x, y, gameId } }))
+        wss.send(JSON.stringify({event: 'shoot', payload: {username: localStorage.nickname, x, y, gameId}}))
     }
 
     useEffect(() => {
-        wss.send(JSON.stringify({ event: 'connect', payload: { username: localStorage.nickname, gameId } }))
+        wss.send(JSON.stringify({event: 'connect', payload: {username: localStorage.nickname, gameId}}))
         restart()
     }, [])
 
     function ready() {
-        wss.send(JSON.stringify({ event: 'ready', payload: { username: localStorage.nickname, gameId } }))
+        wss.send(JSON.stringify({event: 'ready', payload: {username: localStorage.nickname, gameId}}))
         setShipsReady(true)
     }
 
     wss.onmessage = function (resp) {
 
-        const { type, payload } = JSON.parse(resp.data)
-        const { username, x, y, canStart, rivalName, success } = payload
+        const {type, payload} = JSON.parse(resp.data)
+        const {username, x, y, canStart, rivalName, success} = payload
 
         switch (type) {
 
@@ -70,7 +70,7 @@ const GamePage = () => {
 
                     const isPerfectHit = myBoard.cells[x][y].mark?.name === 'ship'
                     changeBoardAfterShoot(myBoard, setMyBoard, x, y, isPerfectHit)
-                    wss.send(JSON.stringify({ event: 'checkShoot', payload: { ...payload, isPerfectHit } }))
+                    wss.send(JSON.stringify({event: 'checkShoot', payload: {...payload, isPerfectHit}}))
                     if (!isPerfectHit) {
                         setCanShoot(true)
                     }

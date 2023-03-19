@@ -1,6 +1,6 @@
 import React from "react";
 
-const ActionsInfo = ({ shipsReady = false, canShoot = false, ready }) => {
+const ActionsInfo = ({shipsReady = false, canShoot = false, ready}) => {
 
     console.log('shipsReady = ' + shipsReady)
 

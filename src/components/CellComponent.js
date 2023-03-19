@@ -1,6 +1,6 @@
 import React from "react";
 
-const CellComponent = ({ cell, addMark }) => {
+const CellComponent = ({cell, addMark}) => {
 
     const cellClasses = ['cell']
 
