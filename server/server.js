@@ -11,7 +11,7 @@ function initGames(client, gameId) {
     }
 
     // Если в игре 1 человек
-    if (games[gameId] && gameId[gameId]?.length < 2) {
+    if (games[gameId] && games[gameId]?.length < 2) {
         games[gameId] = [...games[gameId], client]
     }
 
@@ -28,7 +28,7 @@ function broadcast(req) {
 
     let res;
 
-    games[gameId].forEach(client => {
+    games[gameId].forEach((client) => {
 
         switch (req.event) {
 
@@ -65,7 +65,7 @@ function broadcast(req) {
 
 }
 
-const start = () => {
+function start() {
 
     const wss = new WebSocket.Server(
         { port: port },
@@ -78,7 +78,7 @@ const start = () => {
 
             const req = JSON.parse(msg.toString())
 
-            if (req.event === 'connection') {
+            if (req.event === 'connect') {
 
                 client.nickname = req.payload.username
                 initGames(client, req.payload.gameId)
