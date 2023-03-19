@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { Board } from "../models/Board";
 import BoardComponent from "../components/BoardComponent";
+import ActionsInfo from "../components/ActionsInfo";
+
+const wss = new WebSocket('ws://localhost:4000')
 
 const GamePage = () => {
 
@@ -25,11 +28,72 @@ const GamePage = () => {
         setEnemyBoard(enemyNewBoard)
     }
 
-    function shoot(x, y) {
+    const navigate = useNavigate()
 
+    function shoot(x, y) {
+        wss.send(JSON.stringify({ event: 'shoot', payload: { username: localStorage.nickname, x, y, gameId } }))
     }
 
-    useEffect(() => { restart() }, [])
+    useEffect(() => {
+        wss.send(JSON.stringify({ event: 'connect', payload: { username: localStorage.nickname, gameId } }))
+        restart()
+    }, [])
+
+    function ready() {
+        wss.send(JSON.stringify({ event: 'ready', payload: { username: localStorage.nickname, gameId } }))
+        setShipsReady(true)
+    }
+
+    wss.onmessage = function (resp) {
+
+        const { type, payload } = JSON.parse(resp.data)
+        const { username, x, y, canStart, rivalName, success } = payload
+
+        switch (type) {
+
+            case 'connectToPlay':
+                if (!success) {
+                    return navigate('/')
+                }
+                setRivalName(rivalName)
+                break
+
+            case 'readyToPlay':
+                if (payload.username === localStorage.nickname && canStart) {
+                    setCanShoot(true)
+                }
+                break
+
+            case 'afterShootByMe':
+                console.log('afterShoot', username !== localStorage.nickname)
+                if (username !== localStorage.nickname) {
+
+                    const isPerfectHit = myBoard.cells[x][y].mark?.name === 'ship'
+                    changeBoardAfterShoot(myBoard, setMyBoard, x, y, isPerfectHit)
+                    wss.send(JSON.stringify({ event: 'checkShoot', payload: { ...payload, isPerfectHit } }))
+                    if (!isPerfectHit) {
+                        setCanShoot(true)
+                    }
+                }
+                break
+
+            case 'isPerfectHit':
+                if (username === localStorage.nickname) {
+                    changeBoardAfterShoot(enemyBoard, setEnemyBoard, x, y, payload.isPerfectHit)
+                    setCanShoot(payload.isPerfectHit)
+                }
+                break
+
+            default:
+                break
+        }
+    }
+
+    function changeBoardAfterShoot(board, setBoard, x, y, isPerfectHit) {
+        isPerfectHit ? board.addDamage(x, y) : board.addMiss(x, y)
+        const newBoard = board.getCopyBoard()
+        setBoard(newBoard)
+    }
 
     return (
         <div>
@@ -56,8 +120,9 @@ const GamePage = () => {
                     />
                 </div>
             </div>
+            <ActionsInfo ready={ready} canShoot={canShoot} shipsReady={shipsReady}/>
         </div>
     )
 }
 
-export default GamePage;
+export default GamePage
