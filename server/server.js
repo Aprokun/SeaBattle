@@ -22,6 +22,49 @@ function initGames(client, gameId) {
     }
 }
 
+function broadcast(req) {
+
+    const { username, gameId } = req.payload
+
+    let res;
+
+    games[gameId].forEach(client => {
+
+        switch (req.event) {
+
+            case 'connect':
+                res = {
+                    type: 'connectToPlay',
+                    payload: {
+                        success: true,
+                        rivalName: games[gameId].find(user => user.nickname !== client.nickname)?.nickname,
+                        username: client.nickname
+                    }
+                }
+                break
+
+            case 'ready':
+                res = { type: 'readyToPlay', payload: { canStart: games[gameId].length > 1, username } }
+                break
+
+            case 'shoot':
+                res = { type: 'afterShootByMe', payload: req.payload }
+                break
+
+            case 'checkShoot':
+                res = {type: 'isPerfectHit', payload: req.payload }
+                break
+
+            default:
+                req = { type: 'logout', payload: req.payload }
+                break
+        }
+
+        client.send(JSON.stringify(res))
+    })
+
+}
+
 const start = () => {
 
     const wss = new WebSocket.Server(
@@ -40,6 +83,8 @@ const start = () => {
                 client.nickname = req.payload.username
                 initGames(client, req.payload.gameId)
             }
+
+            broadcast(req)
         })
     })
 }
